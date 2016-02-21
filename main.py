@@ -1,9 +1,11 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify, session
 import requests
 import UserFactory
 from datetime import datetime, timedelta
+import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 candidate_pool = UserFactory.generate_candidates(5)
 
@@ -30,7 +32,8 @@ def test():
 
 @app.route('/book/<int:candidate_id>')
 def book_candidate(candidate_id):
-    candidate = None
+    session_key = 'user'+str(candidate_id)
+    candidate = None if not session_key in session else session[session_key]
     for c in candidate_pool:
         if c['id'] == candidate_id:
             candidate = c
@@ -47,6 +50,29 @@ def book_candidate(candidate_id):
 
     # Make call to recommended hotels
     hotel = fetch_recommended_hotels(current_office['latitude'], current_office['longitude'], dept_date, ret_date)
+
+    user_response = {
+        'name': candidate['name'],
+        'hotel': hotel,
+        'planes': [
+            {
+                'origin': candidate_airport,
+                'destination': company_airport,
+                'departure': str(f1['departureTime']),
+                'arrival': str(f1['arrivalTime']),
+                'flight_number': f1['airlineCode'] + "-" + f1['flightNumber']
+            },
+            {
+                'origin': company_airport,
+                'destination': candidate_airport,
+                'departure': str(f2['departureTime']),
+                'arrival': str(f2['arrivalTime']),
+                'flight_number': f2['airlineCode'] + "-" + f2['flightNumber']
+            }
+        ]
+    }
+
+    session[session_key] = user_response
 
 
     return render_template('book.html', candidate=candidate, company_airport=company_airport, candidate_airport=candidate_airport, flight1=f1, flight2=f2, hotel=hotel)
@@ -102,11 +128,17 @@ def fetch_recommended_hotels(lat, lng, checkin_date, checkout_date):
 
     hotel = {
         'name': first_hotel['Name'],
-        'address': first_hotel_location['StreetAddress'] + ',' + first_hotel_location['City'] + ',' + first_hotel_location['Province']
+        'address': first_hotel_location['StreetAddress'] + ',' + first_hotel_location['City'] + ',' + first_hotel_location['Province'],
+        'check_in': str(checkin_date),
+        'check_out': str(checkout_date)
     }
 
     return hotel
 
+@app.route('/candidate/<int:candidate_id>.json')
+def fetch_candidate(candidate_id):
+    session_key = 'user'+str(candidate_id)
+    return jsonify(session[session_key])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
