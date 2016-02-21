@@ -2,10 +2,11 @@ from flask import Flask, render_template, jsonify, session
 import requests
 import UserFactory
 from datetime import datetime, timedelta
-import os
+from rauth import OAuth2Service
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.config.from_object('app_config')
+app.secret_key = app.config['APP_SECRET']
 
 candidate_pool = UserFactory.generate_candidates(5)
 
@@ -17,6 +18,30 @@ current_office = {
 }
 
 EXPEDIA_API_KEY="CCK2GO59nPAFwiFiPX4D3HsZORoHWat7"
+UBER_CLIENT_ID="P7I1oMD8sDWl3kfyrcfPUv-mlzzAehMF"
+UBER_CLIENT_SEC="vfD2BAJLdAxD-i3IlyLbFSawsZE4S79XgFvybzTv"
+REDIRECT_URI=app.config['REDIRECT_URI']
+
+def create_uber_auth():
+    """
+        Returns an OAuth2Service object that contains the required credentials
+    """
+    uber_obj = OAuth2Service(
+        client_id=UBER_CLIENT_ID,
+        client_secret=UBER_CLIENT_SEC,
+        name='TestApp1Prv',
+        authorize_url='https://login.uber.com/oauth/authorize',
+        access_token_url='https://login.uber.com/oauth/token',
+        base_url='https://api.uber.com/v1/'
+    )
+
+    uber_params = {
+        'response_type': 'code',
+        'redirect_uri': app.config['REDIRECT_URI'],
+        'scope': 'profile request',
+    }
+
+    return uber_obj.get_authorize_url(**uber_params)
 
 @app.route('/')
 def index():
@@ -33,7 +58,8 @@ def test():
 @app.route('/book/<int:candidate_id>')
 def book_candidate(candidate_id):
     session_key = 'user'+str(candidate_id)
-    candidate = None if not session_key in session else session[session_key]
+    candidate = None
+
     for c in candidate_pool:
         if c['id'] == candidate_id:
             candidate = c
@@ -53,6 +79,8 @@ def book_candidate(candidate_id):
 
     user_response = {
         'name': candidate['name'],
+        'interview_date': candidate['interview_date'],
+        'address': candidate['address'],
         'hotel': hotel,
         'planes': [
             {
