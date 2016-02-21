@@ -17,10 +17,15 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-10">
         <h3> {{ candidate.name }} </h3>
         <h6> Address: {{ candidate.address }} </h6>
         <h6> Interview Date: {{ candidate.interview_date }} </h6>
+      </div>
+      <div class="col-md-2">
+        {% if user %}
+             <a> Hi, {{ user.first_name }} </a>
+         {% endif %}
       </div>
     </div>
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
