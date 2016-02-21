@@ -7,6 +7,9 @@ conda create -n UberHackathon -y python==3.4.3 pip
 source activate UberHackathon
 pip install flask
 pip install requests
+pip install fake-factory
+sudo apt-get install nodejs
+sudo apt-get install npm
 # export PATH="$HOME/anaconda/bin:$PATH"
 # conda create -n UberHackathon -y python==3.4.3 pip
 # source activate UberHackathon
