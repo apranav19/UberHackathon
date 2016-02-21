@@ -22,11 +22,127 @@
         <h6> Address: {{ candidate.address }} </h6>
         <h6> Interview Date: {{ candidate.interview_date }} </h6>
       </div>
-      <div class="col-md-12">
-        The closest airport:
-        {{ airport }}
-      </div>
     </div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingOne">
+            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Day 1
+            </a>
+          </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h4> Step 1: Drop Candidate At Airport </h4>
+                  <h5> Candidate Home Address </h5>
+                  <h5> Origin Airport: {{ candidate_airport }} </h5>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h4> Step 2: </h4>
+                  <h5> Origin Airport: {{ candidate_airport }} </h5>
+                  <h5> Destination Airport: {{ company_airport }} </h5>
+                  <h5> Departure Time: {{ flight1.departureTime }} </h5>
+                  <h5> Arrival Time: {{ flight1.arrivalTime }} </h5>
+                  <h5> Flight Number: {{ flight1.airlineCode }} - {{ flight1.flightNumber }} </h5>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h3> Step 3: </h3>
+                  <h5> Destination Airport: {{ company_airport }} </h5>
+                  <h5> Hotel: {{ hotel.name }}</h5>
+                  <h6> Hotel Address: {{ hotel.address }} </h6>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingTwo">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Day 2
+            </a>
+          </div>
+             <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+            <div class="panel-body">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h4> Step 1: Pickup Candidate From Hotel </h4>
+                  <h5> Hotel: {{ hotel.name }}</h5>
+                  <h6> Hotel Address: {{ hotel.address }} </h6>
+                  <h5> Company Location: </h5>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h3> Step 2: Drop Candidate at Hotel </h3>
+                  <h5> Company Location: </h5>
+                  <h5> Hotel: {{ hotel.name }}</h5>
+                  <h6> Hotel Address: {{ hotel.address }} </h6>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingThree">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            Day 3
+          </a>
+          </div>
+             <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+            <div class="panel-body">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h4> Step 1: Drop candidate at airport </h4>
+                  <h5> Hotel: {{ hotel.name }}</h5>
+                  <h6> Hotel Address: {{ hotel.address }} </h6>
+                  <h5> Departure Airport:  </h5>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h4> Step 2: </h4>
+                  <h5> Origin Airport: {{ company_airport }} </h5>
+                  <h5> Destination Airport: {{ candidate_airport }} </h5>
+                  <h5> Departure Time: {{ flight2.departureTime }} </h5>
+                  <h5> Arrival Time: {{ flight2.arrivalTime }} </h5>
+                  <h5> Flight Number: {{ flight2.airlineCode }} - {{ flight2.flightNumber }} </h5>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <h4> Step 3: </h4>
+                  <h5> Arrival Airport:  </h5>
+                  <h5> Candidate Home: </h5>
+                  <button class="btn btn-default">Book an Uber ride</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+    </div>
+  </div>
   </div>
 </body>
 </html>

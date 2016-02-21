@@ -7,10 +7,10 @@ def generate_candidates(num_candidates):
         {
             'id': 1,
             'name': 'Tom Jones',
-            'address': '500 E Cesar Chavez St, Austin, TX 78701',
+            'address': '17620 International Blvd, Seattle, WA 98188',
             'interview_date': '03/22/2016 13:00',
-            'latitude': '30.2636408',
-            'longitude': '-97.741672'
+            'latitude': '47.4417966',
+            'longitude': '-122.3050032'
         },
         {
             'id': 2,
