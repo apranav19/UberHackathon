@@ -3,7 +3,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 </head>
 <body>
   <nav class="navbar navbar-inverse navbar-static-top">
@@ -17,9 +17,16 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-10">
         <h4> {{ company.company_name }} </h4>
         <h5> {{ company.address }} </h5>
+      </div>
+      <div class="col-md-2">
+        {% if not user %}
+            <a class="btn btn-default" href="/login" role="button">Integrate Uber</a>
+        {% else %}
+             <a> Hi, {{ user.first_name }} </a>
+         {% endif %}
       </div>
     </div>
     <div class="row">
