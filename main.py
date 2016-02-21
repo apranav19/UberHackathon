@@ -29,7 +29,7 @@ UBER_CLIENT_ID="P7I1oMD8sDWl3kfyrcfPUv-mlzzAehMF"
 UBER_CLIENT_SEC="vfD2BAJLdAxD-i3IlyLbFSawsZE4S79XgFvybzTv"
 ACCESS_TOKEN_SESSION_ID = 'uber_at'
 BASE_UBER_API="https://api.uber.com/v1/"
-UBER_SANDBOX_API="https://sandbox-api.uber.com/v1"
+UBER_SANDBOX_API="https://sandbox-api.uber.com/v1/"
 
 def create_user_object():
     """
@@ -106,23 +106,137 @@ def login_redirect():
 def book_candidate(candidate_id):
     session_key = 'user'+str(candidate_id)
     candidate = None
+    rides = []
+    steps = []
 
     for c in candidate_pool:
         if c['id'] == candidate_id:
             candidate = c
             break
 
-    company_airport, company_iata = fetch_airport_data(current_office['latitude'], current_office['longitude'])
-    candidate_airport, candidate_iata = fetch_airport_data(candidate['latitude'], candidate['longitude'])
+    company_airport, company_iata, company_position = fetch_airport_data(current_office['latitude'], current_office['longitude'])
+    candidate_airport, candidate_iata, candidate_position = fetch_airport_data(candidate['latitude'], candidate['longitude'])
 
-    dept_date = (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') - timedelta(days=1)).date()
-    ret_date = (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(days=1)).date()
+    rides.append({
+        'ride_id': '1',
+        'start_latitude': candidate['latitude'],
+        'start_longitude': candidate['longitude'],
+        'end_latitude': candidate_position[1],
+        'end_longitude': candidate_position[0],
+        'start_destination': candidate['address'],
+        'end_destination': company_airport
+    })
+
+    make_ride_request(rides[0])
+
+    dept_date = (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') - timedelta(days=1))
+    ret_date = (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(days=1))
+
+    steps.append({
+        'type': 'Uber',
+        'step_id': '1',
+        'start_latitude': rides[0]['start_latitude'],
+        'start_longitude': rides[0]['start_longitude'],
+        'end_latitude': rides[0]['end_latitude'],
+        'end_longitude': rides[0]['end_longitude'],
+        'pickUpTime': str((dept_date - timedelta(hours=2)).time()),
+        'startDestination': rides[0]['start_destination'],
+        'endDestination': rides[0]['end_destination'],
+        'estimatedArrivalTime': '8:40 AM',
+        'driverName': 'John'
+    })
+
+    print(str(steps[0]))
 
     # Make call to recommended flights
-    f1, f2 = fetch_recommended_flight(candidate_iata, company_iata, dept_date, ret_date)
+    f1, f2 = fetch_recommended_flight(candidate_iata, company_iata, dept_date.date(), ret_date.date())
+
+    print(str(f1))
+
+    steps.append({
+        'type': 'Flight',
+        'step_id': '2',
+        'flightTime': f1['departureTime'],
+        'startDestination': candidate_airport,
+        'endDestination': company_airport,
+        'estimatedArrivalTime': f1['arrivalTime'],
+        'Gate': 'A22'
+    })
 
     # Make call to recommended hotels
     hotel = fetch_recommended_hotels(current_office['latitude'], current_office['longitude'], dept_date, ret_date)
+
+    steps.append({
+        'type': 'Hotel',
+        'step_id': '3',
+        'dayOfWeek': 'Friday',
+        'checkInDate': hotel['check_in'],
+        'checkOutDate': hotel['check_out']
+    })
+
+    steps.append({
+        'type': 'Uber',
+        'step_id': '4',
+        'start_latitude': hotel['latitude'],
+        'start_longitude': hotel['longitude'],
+        'end_latitude': current_office['latitude'],
+        'end_longitude': current_office['longitude'],
+        'pickUpTime': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') - timedelta(hours=2)).time()),
+        'startDestination': hotel['address'],
+        'endDestination': current_office['address'],
+        'estimatedArrivalTime': '8:40 AM',
+        'driverName': 'John'
+    })
+
+    steps.append({
+        'type': 'Uber',
+        'step_id': '5',
+        'end_latitude': hotel['latitude'],
+        'end_longitude': hotel['longitude'],
+        'start_latitude': current_office['latitude'],
+        'start_longitude': current_office['longitude'],
+        'pickUpTime': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(hours=5)).time()),
+        'startDestination': hotel['address'],
+        'endDestination': current_office['address'],
+        'estimatedArrivalTime': '8:40 AM',
+        'driverName': 'John'
+    })
+
+    steps.append({
+        'type': 'Uber',
+        'step_id': '6',
+        'end_latitude': hotel['latitude'],
+        'end_longitude': hotel['longitude'],
+        'start_latitude': current_office['latitude'],
+        'start_longitude': current_office['longitude'],
+        'pickUpTime': str((ret_date - timedelta(hours=2)).time()),
+        'endDestination': company_airport,
+        'startDestination': hotel['address'],
+        'estimatedArrivalTime': '8:40 AM',
+        'driverName': 'John'
+    })
+
+    steps.append({
+        'type': 'Flight',
+        'step_id': '7',
+        'flightTime': f2['departureTime'],
+        'startDestination': company_airport,
+        'endDestination': candidate_airport,
+        'estimatedArrivalTime': f2['arrivalTime'],
+        'Gate': 'A22'
+    })
+
+    '''
+        rides.append({
+            'ride_id': '2',
+            'start_latitude': company_position[1],
+            'start_longitude': company_position[0],
+            'end_latitude': hotel['latitude'],
+            'end_longitude': hotel['longitude']
+        })
+    '''
+
+
 
     user_response = {
         'user_id': str(candidate_id),
@@ -148,12 +262,16 @@ def book_candidate(candidate_id):
         ]
     }
 
-    res_inst = user_collection.insert_one(user_response)
+    #res_inst = user_collection.insert_one(user_response)
+
+    res_inst = user_collection.insert_one({'user_id': str(candidate_id), 'steps': steps})
 
     #session[session_key] = user_response
 
 
-    return render_template('book.html', candidate=candidate, company_airport=company_airport, candidate_airport=candidate_airport, flight1=f1, flight2=f2, hotel=hotel)
+    return render_template('book.html', candidate=candidate, company_airport=company_airport,
+            candidate_airport=candidate_airport, flight1=f1, flight2=f2, hotel=hotel,
+            user=session.get('current_user', None))
 
 
 def fetch_airport_data(lat, lng):
@@ -171,8 +289,9 @@ def fetch_airport_data(lat, lng):
 
     airport_name = resp_dict[0]['name']
     airport_iata = resp_dict[0]['tags']['iata']['airportCode']['value']
+    airport_position = resp_dict[0]['position']['coordinates']
 
-    return airport_name, airport_iata
+    return airport_name, airport_iata, airport_position
 
 def fetch_recommended_flight(origin, destination, dept_date, ret_date):
     params = {
@@ -208,7 +327,9 @@ def fetch_recommended_hotels(lat, lng, checkin_date, checkout_date):
         'name': first_hotel['Name'],
         'address': first_hotel_location['StreetAddress'] + ',' + first_hotel_location['City'] + ',' + first_hotel_location['Province'],
         'check_in': str(checkin_date),
-        'check_out': str(checkout_date)
+        'check_out': str(checkout_date),
+        'latitude': first_hotel_location['GeoLocation']['Latitude'],
+        'longitude': first_hotel_location['GeoLocation']['Longitude']
     }
 
     return hotel
@@ -221,15 +342,28 @@ def fetch_candidate(candidate_id):
             'error': 'Candidate ID not found'
         })
     else:
-        user_response = {
-            'user_id': str(user_res['user_id']),
-            'name': user_res['name'],
-            'interview_date': user_res['interview_date'],
-            'address': user_res['address'],
-            'hotel': user_res['hotel'],
-            'planes': user_res['planes']
+        user_resp = {
+            'steps': user_res['steps']
         }
-        return jsonify(user_response)
+        return jsonify(user_resp)
+
+def make_ride_request(ride):
+    if ACCESS_TOKEN_SESSION_ID in session:
+        ride_resp = requests.post(
+            UBER_SANDBOX_API+'requests',
+            headers={
+                'Authorization': 'bearer %s' % session['uber_at'],
+                'Content-Type': 'application/json'
+            },
+            params=json.dumps({
+                'start_latitude': ride['start_latitude'],
+                'start_longitude': ride['start_longitude'],
+                'end_latitude': ride['end_latitude'],
+                'end_longitude': ride['end_longitude']
+            })
+        ).json()
+
+        print(str(ride_resp))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
