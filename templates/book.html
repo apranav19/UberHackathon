@@ -44,7 +44,10 @@
                   <h4> Step 1: Drop Candidate At Airport </h4>
                   <h5> Candidate Home Address </h5>
                   <h5> Origin Airport: {{ candidate_airport }} </h5>
-                  <button class="btn btn-default">Book an Uber ride</button>
+                  <h5> Ride Summary: </h5>
+                  <h5> Status: {{ rides[0].status }} </h5>
+                  <h5> Driver: {{ rides[0].driver }} </h5>
+                  <h5> ETA: {{ rides[0].eta }} </h5>
                 </div>
               </div>
               <div class="panel panel-default">
@@ -63,7 +66,10 @@
                   <h5> Destination Airport: {{ company_airport }} </h5>
                   <h5> Hotel: {{ hotel.name }}</h5>
                   <h6> Hotel Address: {{ hotel.address }} </h6>
-                  <button class="btn btn-default">Book an Uber ride</button>
+                  <h5> Ride Summary: </h5>
+                  <h5> Status: {{ rides[1].status }} </h5>
+                  <h5> Driver: {{ rides[1].driver }} </h5>
+                  <h5> ETA: {{ rides[1].eta }} </h5>
                 </div>
               </div>
             </div>
@@ -87,7 +93,10 @@
                   <h5> Hotel: {{ hotel.name }}</h5>
                   <h6> Hotel Address: {{ hotel.address }} </h6>
                   <h5> Company Location: </h5>
-                  <button class="btn btn-default">Book an Uber ride</button>
+                  <h5> Ride Summary: </h5>
+                  <h5> Status: {{ rides[2].status }} </h5>
+                  <h5> Driver: {{ rides[2].driver }} </h5>
+                  <h5> ETA: {{ rides[2].eta }} </h5>
                 </div>
               </div>
               <div class="panel panel-default">
@@ -96,7 +105,10 @@
                   <h5> Company Location: </h5>
                   <h5> Hotel: {{ hotel.name }}</h5>
                   <h6> Hotel Address: {{ hotel.address }} </h6>
-                  <button class="btn btn-default">Book an Uber ride</button>
+                  <h5> Ride Summary: </h5>
+                  <h5> Status: {{ rides[3].status }} </h5>
+                  <h5> Driver: {{ rides[3].driver }} </h5>
+                  <h5> ETA: {{ rides[3].eta }} </h5>
                 </div>
               </div>
             </div>
@@ -120,7 +132,10 @@
                   <h5> Hotel: {{ hotel.name }}</h5>
                   <h6> Hotel Address: {{ hotel.address }} </h6>
                   <h5> Departure Airport:  </h5>
-                  <button class="btn btn-default">Book an Uber ride</button>
+                  <h5> Ride Summary: </h5>
+                  <h5> Status: {{ rides[4].status }} </h5>
+                  <h5> Driver: {{ rides[4].driver }} </h5>
+                  <h5> ETA: {{ rides[4].eta }} </h5>
                 </div>
               </div>
               <div class="panel panel-default">
@@ -131,7 +146,6 @@
                   <h5> Departure Time: {{ flight2.departureTime }} </h5>
                   <h5> Arrival Time: {{ flight2.arrivalTime }} </h5>
                   <h5> Flight Number: {{ flight2.airlineCode }} - {{ flight2.flightNumber }} </h5>
-                  <button class="btn btn-default">Book an Uber ride</button>
                 </div>
               </div>
               <div class="panel panel-default">
@@ -139,7 +153,10 @@
                   <h4> Step 3: </h4>
                   <h5> Arrival Airport:  </h5>
                   <h5> Candidate Home: </h5>
-                  <button class="btn btn-default">Book an Uber ride</button>
+                  <h5> Ride Summary: </h5>
+                  <h5> Status: {{ rides[5].status }} </h5>
+                  <h5> Driver: {{ rides[5].driver }} </h5>
+                  <h5> ETA: {{ rides[5].eta }} </h5>
                 </div>
               </div>
             </div>

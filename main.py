@@ -124,10 +124,14 @@ def book_candidate(candidate_id):
         'end_latitude': candidate_position[1],
         'end_longitude': candidate_position[0],
         'start_destination': candidate['address'],
-        'end_destination': company_airport
+        'end_destination' : candidate_airport
     })
 
-    make_ride_request(rides[0])
+    print('Ride Request 1 ------')
+    rides_resp = make_ride_request(rides[0])
+    rides[0]['status'] = rides_resp['status']
+    rides[0]['driver'] = rides_resp['driver']
+    rides[0]['eta'] = rides_resp['eta']
 
     dept_date = (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') - timedelta(days=1))
     ret_date = (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(days=1))
@@ -143,15 +147,12 @@ def book_candidate(candidate_id):
         'startDestination': rides[0]['start_destination'],
         'endDestination': rides[0]['end_destination'],
         'estimatedArrivalTime': '8:40 AM',
+        'pickUpDate': str(dept_date.date()),
         'driverName': 'John'
     })
 
-    print(str(steps[0]))
-
     # Make call to recommended flights
     f1, f2 = fetch_recommended_flight(candidate_iata, company_iata, dept_date.date(), ret_date.date())
-
-    print(str(f1))
 
     steps.append({
         'type': 'Flight',
@@ -160,18 +161,34 @@ def book_candidate(candidate_id):
         'startDestination': candidate_airport,
         'endDestination': company_airport,
         'estimatedArrivalTime': f1['arrivalTime'],
+        'airline': f1['airlineName'],
         'Gate': 'A22'
     })
 
     # Make call to recommended hotels
     hotel = fetch_recommended_hotels(current_office['latitude'], current_office['longitude'], dept_date, ret_date)
 
+    rides.append({
+        'ride_id': '2',
+        'start_latitude': company_position[1],
+        'start_longitude': company_position[0],
+        'end_latitude': hotel['latitude'],
+        'end_longitude': hotel['longitude']
+    })
+
+    print('Ride Request 2 ------')
+    rides_resp = make_ride_request(rides[1])
+    rides[1]['status'] = rides_resp['status']
+    rides[1]['driver'] = rides_resp['driver']
+    rides[1]['eta'] = rides_resp['eta']
+
     steps.append({
         'type': 'Hotel',
         'step_id': '3',
         'dayOfWeek': 'Friday',
         'checkInDate': hotel['check_in'],
-        'checkOutDate': hotel['check_out']
+        'checkOutDate': hotel['check_out'],
+        'name': hotel['name']
     })
 
     steps.append({
@@ -185,8 +202,65 @@ def book_candidate(candidate_id):
         'startDestination': hotel['address'],
         'endDestination': current_office['address'],
         'estimatedArrivalTime': '8:40 AM',
+        'pickUpDate': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M')).date()),
         'driverName': 'John'
     })
+
+    rides.append({
+        'ride_id': '3',
+        'start_latitude': hotel['latitude'],
+        'start_longitude': hotel['longitude'],
+        'end_latitude': current_office['latitude'],
+        'end_longitude': current_office['longitude']
+    })
+
+    print('Ride Request 3 ------')
+    rides_resp = make_ride_request(rides[2])
+    rides[2]['status'] = rides_resp['status']
+    rides[2]['driver'] = rides_resp['driver']
+    rides[2]['eta'] = rides_resp['eta']
+
+    rides.append({
+        'ride_id': '4',
+        'end_latitude': hotel['latitude'],
+        'end_longitude': hotel['longitude'],
+        'start_latitude': current_office['latitude'],
+        'start_longitude': current_office['longitude']
+    })
+
+    print('Ride Request 4 ------')
+    rides_resp = make_ride_request(rides[3])
+    rides[3]['status'] = rides_resp['status']
+    rides[3]['driver'] = rides_resp['driver']
+    rides[3]['eta'] = rides_resp['eta']
+
+    rides.append({
+        'ride_id': '5',
+        'start_latitude': hotel['latitude'],
+        'start_longitude': hotel['longitude'],
+        'end_latitude': company_position[1],
+        'end_longitude': company_position[0]
+    })
+
+    print('Ride Request 5 ------')
+    rides_resp = make_ride_request(rides[4])
+    rides[4]['status'] = rides_resp['status']
+    rides[4]['driver'] = rides_resp['driver']
+    rides[4]['eta'] = rides_resp['eta']
+
+    rides.append({
+        'ride_id': '6',
+        'start_latitude': candidate_position[1],
+        'start_longitude': candidate_position[0],
+        'end_latitude': candidate['latitude'],
+        'end_longitude': candidate['longitude']
+    })
+
+    print('Ride Request 6 ------')
+    rides_resp = make_ride_request(rides[5])
+    rides[5]['status'] = rides_resp['status']
+    rides[5]['driver'] = rides_resp['driver']
+    rides[5]['eta'] = rides_resp['eta']
 
     steps.append({
         'type': 'Uber',
@@ -198,6 +272,7 @@ def book_candidate(candidate_id):
         'pickUpTime': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(hours=5)).time()),
         'startDestination': hotel['address'],
         'endDestination': current_office['address'],
+        'pickUpDate': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M')).date()),
         'estimatedArrivalTime': '8:40 AM',
         'driverName': 'John'
     })
@@ -212,6 +287,7 @@ def book_candidate(candidate_id):
         'pickUpTime': str((ret_date - timedelta(hours=2)).time()),
         'endDestination': company_airport,
         'startDestination': hotel['address'],
+        'pickUpDate': str((ret_date).date()),
         'estimatedArrivalTime': '8:40 AM',
         'driverName': 'John'
     })
@@ -223,6 +299,7 @@ def book_candidate(candidate_id):
         'startDestination': company_airport,
         'endDestination': candidate_airport,
         'estimatedArrivalTime': f2['arrivalTime'],
+        'airline': f2['airlineName'],
         'Gate': 'A22'
     })
 
@@ -271,6 +348,7 @@ def book_candidate(candidate_id):
 
     return render_template('book.html', candidate=candidate, company_airport=company_airport,
             candidate_airport=candidate_airport, flight1=f1, flight2=f2, hotel=hotel,
+            rides=rides,
             user=session.get('current_user', None))
 
 
@@ -355,7 +433,7 @@ def make_ride_request(ride):
                 'Authorization': 'bearer %s' % session['uber_at'],
                 'Content-Type': 'application/json'
             },
-            params=json.dumps({
+            data=json.dumps({
                 'start_latitude': ride['start_latitude'],
                 'start_longitude': ride['start_longitude'],
                 'end_latitude': ride['end_latitude'],
@@ -363,7 +441,7 @@ def make_ride_request(ride):
             })
         ).json()
 
-        print(str(ride_resp))
+        return ride_resp
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
