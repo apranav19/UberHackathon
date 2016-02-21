@@ -9,6 +9,10 @@ pip install flask
 pip install requests
 pip install fake-factory
 pip install rauth
+pip install gunicorn
+sudo apt-get install ruby-full
+wget -O- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+heroku
 # export PATH="$HOME/anaconda/bin:$PATH"
 # conda create -n UberHackathon -y python==3.4.3 pip
 # source activate UberHackathon
