@@ -8,6 +8,7 @@ source activate UberHackathon
 pip install flask
 pip install requests
 pip install fake-factory
+pip install rauth
 # export PATH="$HOME/anaconda/bin:$PATH"
 # conda create -n UberHackathon -y python==3.4.3 pip
 # source activate UberHackathon
