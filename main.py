@@ -38,7 +38,8 @@ def create_user_object():
     user_data = requests.get(
         BASE_UBER_API+'me',
         headers={
-            'Authorization': 'Bearer {0}'.format(session[ACCESS_TOKEN_SESSION_ID])
+            'Authorization': 'Bearer {0}'.format(session[ACCESS_TOKEN_SESSION_ID]),
+            'Content-Type': 'application/json'
         }
     ).json()
     session['current_user'] = user_data
@@ -143,7 +144,7 @@ def book_candidate(candidate_id):
         'start_longitude': rides[0]['start_longitude'],
         'end_latitude': rides[0]['end_latitude'],
         'end_longitude': rides[0]['end_longitude'],
-        'pickUpTime': str((dept_date - timedelta(hours=2)).time()),
+        'pickUpTime': (dept_date - timedelta(hours=2)).strftime("%I:%M %p"),
         'startDestination': rides[0]['start_destination'],
         'endDestination': rides[0]['end_destination'],
         'estimatedArrivalTime': '8:40 AM',
@@ -198,7 +199,7 @@ def book_candidate(candidate_id):
         'start_longitude': hotel['longitude'],
         'end_latitude': current_office['latitude'],
         'end_longitude': current_office['longitude'],
-        'pickUpTime': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') - timedelta(hours=2)).time()),
+        'pickUpTime': (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') - timedelta(hours=2)).strftime("%I:%M %p"),
         'startDestination': hotel['address'],
         'endDestination': current_office['address'],
         'estimatedArrivalTime': '8:40 AM',
@@ -269,7 +270,7 @@ def book_candidate(candidate_id):
         'end_longitude': hotel['longitude'],
         'start_latitude': current_office['latitude'],
         'start_longitude': current_office['longitude'],
-        'pickUpTime': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(hours=5)).time()),
+        'pickUpTime': (datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M') + timedelta(hours=5)).strftime("%I:%M %p"),
         'startDestination': hotel['address'],
         'endDestination': current_office['address'],
         'pickUpDate': str((datetime.strptime(candidate['interview_date'], '%m/%d/%Y %H:%M')).date()),
@@ -284,7 +285,7 @@ def book_candidate(candidate_id):
         'end_longitude': hotel['longitude'],
         'start_latitude': current_office['latitude'],
         'start_longitude': current_office['longitude'],
-        'pickUpTime': str((ret_date - timedelta(hours=2)).time()),
+        'pickUpTime': (ret_date - timedelta(hours=2)).strftime("%I:%M %p"),
         'endDestination': company_airport,
         'startDestination': hotel['address'],
         'pickUpDate': str((ret_date).date()),
