@@ -1,0 +1,53 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">
+          Fora
+        </a>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <h4> {{ company.company_name }} </h4>
+        <h5> {{ company.address }} </h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <h3> Candidates </h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Interview Date</th>
+              <th>Actions </th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for candidate in candidates %}
+          <tr>
+            <td>{{ candidate.name }} </td>
+            <td>{{ candidate.address }} </td>
+            <td>{{ candidate.interview_date }} </td>
+            <td><button class="btn btn-default">Create Trip</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
