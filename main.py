@@ -1,14 +1,19 @@
-from flask import Flask, render_template, jsonify, session
+from flask import Flask, render_template, jsonify, session, redirect, request, url_for
 import requests
 import UserFactory
 from datetime import datetime, timedelta
 from rauth import OAuth2Service
+import sys
+from pymongo import MongoClient
 
 app = Flask(__name__)
 app.config.from_object('app_config')
 app.secret_key = app.config['APP_SECRET']
 
 candidate_pool = UserFactory.generate_candidates(5)
+client = MongoClient('mongodb://foradmin:fora@ds035240.mongolab.com:35240/foradb')
+foradb = client['foradb']
+user_collection = foradb['userdata']
 
 current_office = {
    'company_name': 'Blue Whale Inc.',
@@ -20,7 +25,22 @@ current_office = {
 EXPEDIA_API_KEY="CCK2GO59nPAFwiFiPX4D3HsZORoHWat7"
 UBER_CLIENT_ID="P7I1oMD8sDWl3kfyrcfPUv-mlzzAehMF"
 UBER_CLIENT_SEC="vfD2BAJLdAxD-i3IlyLbFSawsZE4S79XgFvybzTv"
-REDIRECT_URI=app.config['REDIRECT_URI']
+ACCESS_TOKEN_SESSION_ID = 'uber_at'
+BASE_UBER_API="https://api.uber.com/v1/"
+UBER_SANDBOX_API="https://sandbox-api.uber.com/v1"
+
+def create_user_object():
+    """
+        Creates a new User object and stores basic information in session
+    """
+    user_data = requests.get(
+        BASE_UBER_API+'me',
+        headers={
+            'Authorization': 'Bearer {0}'.format(session[ACCESS_TOKEN_SESSION_ID])
+        }
+    ).json()
+    session['current_user'] = user_data
+    print('Session size: ' + str(sys.getsizeof(session['current_user'])))
 
 def create_uber_auth():
     """
@@ -49,11 +69,39 @@ def index():
 
 @app.route('/candidates')
 def get_candidates():
-    return render_template('pool.html', candidates=candidate_pool, company=current_office)
+    current_user = None
+    if ACCESS_TOKEN_SESSION_ID in session:
+        create_user_object()
+    return render_template('pool.html', candidates=candidate_pool, company=current_office, user=session.get('current_user', None))
 
 @app.route('/login')
 def test():
-    return 'Hello World'
+    uber_auth_url = create_uber_auth()
+    return redirect(uber_auth_url)
+
+@app.route('/callback')
+def login_redirect():
+    parameters = {
+        'redirect_uri': app.config['REDIRECT_URI'],
+        'code': request.args.get('code', None),
+        'grant_type': 'authorization_code',
+    }
+
+    response = requests.post(
+        'https://login.uber.com/oauth/token',
+        auth=(
+            UBER_CLIENT_ID,
+            UBER_CLIENT_SEC,
+        ),
+        data=parameters,
+    )
+
+    access_token = response.json().get('access_token')
+    if access_token:
+        session[ACCESS_TOKEN_SESSION_ID] = access_token
+
+    print(access_token)
+    return redirect(url_for('get_candidates'))
 
 @app.route('/book/<int:candidate_id>')
 def book_candidate(candidate_id):
@@ -78,6 +126,7 @@ def book_candidate(candidate_id):
     hotel = fetch_recommended_hotels(current_office['latitude'], current_office['longitude'], dept_date, ret_date)
 
     user_response = {
+        'user_id': str(candidate_id),
         'name': candidate['name'],
         'interview_date': candidate['interview_date'],
         'address': candidate['address'],
@@ -100,7 +149,11 @@ def book_candidate(candidate_id):
         ]
     }
 
-    session[session_key] = user_response
+    res_inst = user_collection.insert_one(user_response)
+
+    print(str(res_inst.inserted_id))
+
+    #session[session_key] = user_response
 
 
     return render_template('book.html', candidate=candidate, company_airport=company_airport, candidate_airport=candidate_airport, flight1=f1, flight2=f2, hotel=hotel)
@@ -165,8 +218,13 @@ def fetch_recommended_hotels(lat, lng, checkin_date, checkout_date):
 
 @app.route('/candidate/<int:candidate_id>.json')
 def fetch_candidate(candidate_id):
-    session_key = 'user'+str(candidate_id)
-    return jsonify(session[session_key])
+    user_res = user_collection.find_one({'user_id': candidate_id})
+    if user_res is None:
+        return jsonify({
+            'error': 'Candidate ID not found'
+        })
+    else:
+        return jsonify(user_res)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
