@@ -22,7 +22,11 @@
         <h5> {{ company.address }} </h5>
       </div>
       <div class="col-md-2">
-        <a class="btn btn-default" href="/login" role="button">Integrate Uber</a>
+        {% if not user %}
+            <a class="btn btn-default" href="/login" role="button">Integrate Uber</a>
+        {% else %}
+             <a> Hi, {{ user.first_name }} </a>
+         {% endif %}
       </div>
     </div>
     <div class="row">

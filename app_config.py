@@ -1,4 +1,4 @@
 import os
 
 APP_SECRET=os.urandom(24)
-REDIRECT_URI="https://radiant-plains-34333.herokuapp.com/callback"
+REDIRECT_URI="http://localhost:8080/callback"
