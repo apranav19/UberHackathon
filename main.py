@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from rauth import OAuth2Service
 import sys
 from pymongo import MongoClient
+from bson.json_util import dumps
+import json
 
 app = Flask(__name__)
 app.config.from_object('app_config')
@@ -40,7 +42,6 @@ def create_user_object():
         }
     ).json()
     session['current_user'] = user_data
-    print('Session size: ' + str(sys.getsizeof(session['current_user'])))
 
 def create_uber_auth():
     """
@@ -99,8 +100,6 @@ def login_redirect():
     access_token = response.json().get('access_token')
     if access_token:
         session[ACCESS_TOKEN_SESSION_ID] = access_token
-
-    print(access_token)
     return redirect(url_for('get_candidates'))
 
 @app.route('/book/<int:candidate_id>')
@@ -150,8 +149,6 @@ def book_candidate(candidate_id):
     }
 
     res_inst = user_collection.insert_one(user_response)
-
-    print(str(res_inst.inserted_id))
 
     #session[session_key] = user_response
 
@@ -218,13 +215,21 @@ def fetch_recommended_hotels(lat, lng, checkin_date, checkout_date):
 
 @app.route('/candidate/<int:candidate_id>.json')
 def fetch_candidate(candidate_id):
-    user_res = user_collection.find_one({'user_id': candidate_id})
+    user_res = user_collection.find_one({'user_id': str(candidate_id)})
     if user_res is None:
         return jsonify({
             'error': 'Candidate ID not found'
         })
     else:
-        return jsonify(user_res)
+        user_response = {
+            'user_id': str(user_res['user_id']),
+            'name': user_res['name'],
+            'interview_date': user_res['interview_date'],
+            'address': user_res['address'],
+            'hotel': user_res['hotel'],
+            'planes': user_res['planes']
+        }
+        return jsonify(user_response)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
